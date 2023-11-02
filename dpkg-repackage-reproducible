@@ -26,7 +26,8 @@ freeze_deb() {
         mv -vi "$deb" "$deb.orig"
     fi
 
-    if ! SOURCE_DATE_EPOCH=$epoch dpkg-deb -b "$debdir" "$deb"; then
+    if ! SOURCE_DATE_EPOCH=$epoch TZ=UTC \
+            fakeroot dpkg-deb -b "$debdir" "$deb"; then
         # Restore
         rm -v "$deb"
         mv -vi "$deb.orig" "$deb"
@@ -73,7 +74,14 @@ adjust_timestamps_in_directory() {
     )
 
     # Change all timestamps to epoch
-    find "$debdir" -exec touch -ht "$datems" {} +
+    # (Not needed: dpkg-deb SOURCE_DATE_EPOCH fixes this.)
+    while false; do
+        if test $(find "$debdir" -mtime -18250 | wc -l) -gt 0; then
+            TZ=UTC find "$debdir" -exec touch -ht "$datems" {} +
+        else
+            break
+        fi
+    done
 }
 
 make_reproducible_deb() {

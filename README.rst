@@ -81,3 +81,20 @@ should be unique):
       1 d0dc56cc1f9c67024fdc17f94924009a  zfs-test_2.1.13-1_amd64.deb
       1 17b746efda4ce094687bf7a96a256446  zfs_2.1.13-1_amd64.deb
       1 83a16eb68903e13d80b7e8793743492d  zfs_2.1.13-1_amd64.deb
+
+Example::
+
+    $ diff -pu <(readelf -a 86/sbin/zdb) <(readelf -a 88/sbin/zdb)
+    --- /dev/fd/63  2023-11-02 15:21:56.927688841 +0100
+    +++ /dev/fd/62  2023-11-02 15:21:56.923688823 +0100
+    @@ -1804,7 +1804,7 @@ Displaying notes found in: .note.gnu.pro
+     Displaying notes found in: .note.gnu.build-id
+       Owner                Data size    Description
+       GNU                  0x00000014   NT_GNU_BUILD_ID (unique build ID bitstring)
+    -    Build ID: 28cc87a04ed1ee585472f0c6e2aa5b349f77a9a7
+    +    Build ID: 0b07af4e4d1833e97d274fcb61bb97a913c685fb
+
+     Displaying notes found in: .note.ABI-tag
+       Owner                Data size    Description
+
+Look into: https://blog.beuc.net/posts/Practical_basics_of_reproducible_builds/
