@@ -20,7 +20,13 @@ docker build \
     -t "$TAG" .
 
 mkdir -p "$OUTPUT_DIR"
-if ! docker run "$TAG" sh -c 'tar -c *.tar.gz *.rpm *.deb' |
+if docker version | grep -F '24.0.5' -F; then
+    # Observed on Ubuntu/Jammy with 24.0.5-0ubuntu1~22.04.1
+    echo 'Your docker is broken:' >&2
+    echo https://github.com/moby/moby/issues/45689 >&2
+    exit 1
+fi
+if ! docker run --rm "$TAG" sh -c 'tar -c *.tar.gz *.rpm *.deb' |
         tar -C "$OUTPUT_DIR" -xv; then
     rm -rf "$OUTPUT_DIR"
     false
