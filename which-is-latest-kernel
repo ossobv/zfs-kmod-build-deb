@@ -1,0 +1,63 @@
+#!/bin/sh
+APT_MIRROR=https://apt.osso.nl/ubuntu
+DEFAULT_DIST=focal
+
+set -eu
+if test "${1:-}" = ""; then
+    DIST=$DEFAULT_DIST
+    echo "(selected '$DIST' as distribution)" >&2
+else
+    DIST=$1
+fi
+
+httpget() {
+    if command -v curl >/dev/null; then
+        curl -sSf "$@"
+    elif command -v wget >/dev/null; then
+        wget -qO- "$@"
+    else
+        echo "no wget/curl for $*" >&2
+        exit 1
+    fi
+}
+
+list_linux_image_generic_from_http() {
+    local path
+    for path in $*; do
+        httpget "$APT_MIRROR/dists/$path/binary-amd64/Packages.gz" | zcat
+    done | awk '
+        BEGIN{RS="\n\n"} /Package: linux-image-generic\n/{print $0 "\n"}' |
+        sed -e '/^Depends:/!d;s/^Depends://;s/[, ]\+/,/g' | tr ',' '\n' |
+        grep ^linux-image- | sort -uV
+}
+
+list_linux_image_generic_from_apt() {
+    apt-cache show linux-image-generic | awk '
+        BEGIN{RS="\n\n"} /Package: linux-image-generic\n/{print $0 "\n"}' |
+        sed -e '/^Depends:/!d;s/^Depends://;s/[, ]\+/,/g' | tr ',' '\n' |
+        grep ^linux-image- | sort -uV
+}
+
+get_kernel_packages_for_dist() {
+    local dist="$1"
+    . /etc/os-release || true
+    if test "$dist" = "${VERSION_CODENAME:-}"; then
+        list_linux_image_generic_from_apt
+    else
+        list_linux_image_generic_from_http \
+            $dist/main $dist-updates/main $dist-security/main
+    fi
+}
+
+kernel_pkg_to_falco_ebpf_mod() {
+    # from: linux-image-5.4.0-120-generic
+    # to:   falco_ubuntu-generic_5.4.0-120-generic_113.o (or without _113)
+    local kernelver="${1#linux-image-}"
+    echo "falco_ubuntu-generic_$kernelver.o"
+}
+
+linux_pkg=$(get_kernel_packages_for_dist $DIST | tail -n1)
+linux_ver=${linux_pkg#linux-image-}
+echo "VERSION=$linux_ver"
+echo "PACKAGE=$linux_pkg"
+echo "FALCO_EBPF_MOD=$(kernel_pkg_to_falco_ebpf_mod "$linux_pkg")"

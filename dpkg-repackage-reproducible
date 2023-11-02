@@ -1,0 +1,102 @@
+#!/bin/sh
+set -eu
+
+if test -z "$*"; then
+    echo "$0: please give me a .deb file" >&2
+    exit 1
+fi
+
+thaw_deb() {
+    local deb debdir
+    deb=$1
+    debdir=$2
+    dpkg-deb --raw-extract "$1" "$2"
+}
+
+freeze_deb() {
+    local deb debdir epoch
+    deb=$1
+    debdir=$2
+    epoch=$3
+
+    if test -f "$deb.orig"; then
+        echo "$deb: not overwriting .orig which already existed"
+        rm -v "$deb"
+    else
+        mv -vi "$deb" "$deb.orig"
+    fi
+
+    if ! SOURCE_DATE_EPOCH=$epoch dpkg-deb -b "$debdir" "$deb"; then
+        # Restore
+        rm -v "$deb"
+        mv -vi "$deb.orig" "$deb"
+        exit 1
+    fi
+}
+
+adjust_timestamps_in_directory() {
+    local debdir epoch dater datems
+    debdir=$1
+    epoch=$2
+    dater=$(TZ=UTC date -R -d "@$epoch")
+    datems=$(TZ=UTC date '+%Y%m%d%H%M.00' -d "@$epoch")
+
+    # Fix (auto-generated) Debian changelog timestamp
+    find "$debdir" -type f -name changelog.Debian.gz |
+            while read -r changelog; do
+        gunzip "$changelog"
+        sed -i -e 's/>  .*/>  '"$dater"'/' "${changelog%.gz}"
+        gzip -n "${changelog%.gz}"
+    done
+
+    # Fix "alien" rpm converter timestamp
+    find "$debdir" -type f -name copyright | while read -r copyright; do
+        if grep -q '^a binary [.]rpm package on ' "$copyright"; then
+            sed -i -e '
+                s/^\(a binary .rpm package on\) .*/\1 '"$dater"'/
+                s/^\(Build Date[[:blank:]]*:[[:blank:]]*\).*/\1'"$dater"'/
+            ' "$copyright"
+        fi
+    done
+
+    # Remove all gzip timestamps by unzipping and rezipping with -n
+    find "$debdir" -type f -name '*.gz' | while read -r zippedfile; do
+        gunzip "$zippedfile"
+        gzip -n "${zippedfile%.gz}"
+    done
+
+    # Update md5sum list
+    (
+        cd "$debdir"
+        find . -type f '!' -path './DEBIAN/*' | sed -e 's@^./@@' |
+            LC_ALL=C sort | xargs md5sum >DEBIAN/md5sums
+    )
+
+    # Change all timestamps to epoch
+    find "$debdir" -exec touch -ht "$datems" {} +
+}
+
+make_reproducible_deb() {
+    local deb epoch
+    deb="$1"
+    epoch=0
+
+    if ! test -f "$deb"; then
+        echo "$deb: not found / not a file" >&2
+        exit 1
+    fi
+
+    TEMP=$(mktemp -d)  # global for trap?
+    trap 'rm -rf "$TEMP"' EXIT
+
+    thaw_deb "$deb" "$TEMP"
+    adjust_timestamps_in_directory "$TEMP" $epoch
+    freeze_deb "$deb" "$TEMP" $epoch
+
+    rm -rf "$TEMP"
+    trap '' EXIT
+}
+
+for filename in "$@"; do
+    make_reproducible_deb "$filename"
+done
