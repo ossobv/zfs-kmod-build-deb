@@ -58,6 +58,6 @@ RUN set -x && \
     ./configure --enable-systemd \
         --with-linux=/usr/src/linux-headers-$(cat ../build-targets/kernelver) \
     && \
-    make -j$(NCPU) deb-utils deb-kmod
+    make -j$NCPU deb-utils deb-kmod
 
 RUN ../dpkg-repackage-reproducible *.deb
