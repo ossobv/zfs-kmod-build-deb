@@ -49,15 +49,7 @@ get_kernel_packages_for_dist() {
     fi
 }
 
-kernel_pkg_to_falco_ebpf_mod() {
-    # from: linux-image-5.4.0-120-generic
-    # to:   falco_ubuntu-generic_5.4.0-120-generic_113.o (or without _113)
-    local kernelver="${1#linux-image-}"
-    echo "falco_ubuntu-generic_$kernelver.o"
-}
-
 linux_pkg=$(get_kernel_packages_for_dist $DIST | tail -n1)
 linux_ver=${linux_pkg#linux-image-}
 echo "VERSION=$linux_ver"
 echo "PACKAGE=$linux_pkg"
-echo "FALCO_EBPF_MOD=$(kernel_pkg_to_falco_ebpf_mod "$linux_pkg")"
