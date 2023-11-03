@@ -4,7 +4,8 @@ cd "$(dirname "$0")"
 
 DISTRO=${1:-jammy}
 KERNEL_VERSION=${2:-}  # auto-detect kernel
-OUTPUT_DIR=${3:-./build.single}
+RELEASE_SUFFIX=${3:-osso0}
+OUTPUT_DIR=${4:-./build.single}
 
 OPENZFS_VERSION=${OPENZFS_VERSION:-zfs-2.1.13}
 
@@ -31,6 +32,7 @@ docker build \
     --build-arg="oscodename=$DISTRO" \
     --build-arg="KERNEL_VERSION=$KERNEL_VERSION" \
     --build-arg="OPENZFS_VERSION=$OPENZFS_VERSION" \
+    --build-arg="RELEASE_SUFFIX=$RELEASE_SUFFIX" \
     --build-arg="REPRODUCIBLE_HOST=$REPRODUCIBLE_HOST" \
     -t "$TAG" .
 

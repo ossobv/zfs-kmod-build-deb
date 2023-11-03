@@ -3,35 +3,35 @@ OpenZFS kmod debian package builder
 
 Usage::
 
-    ./buildone.sh jammy 5.15.0-88-generic
+    ./buildone.sh jammy
 
-Builds packages in ``./build.single``::
+Builds packages in ``./build.single``:
+
+.. code-block:: console
 
     $ ls -1 build.single/
-    kmod-zfs-5.15.0-88-generic_2.1.13-1_amd64.deb
-    kmod-zfs-devel-5.15.0-88-generic_2.1.13-1_amd64.deb
-    kmod-zfs-devel_2.1.13-1_amd64.deb
-    libnvpair3_2.1.13-1_amd64.deb
-    libuutil3_2.1.13-1_amd64.deb
-    libzfs5-devel_2.1.13-1_amd64.deb
-    libzfs5_2.1.13-1_amd64.deb
-    libzpool5_2.1.13-1_amd64.deb
-    python3-pyzfs_2.1.13-1_amd64.deb
-    zfs-2.1.13-1.src.rpm
+
+    kmod-zfs-5.15.0-88-generic_2.1.13-1osso0_amd64.deb
+    kmod-zfs-devel-5.15.0-88-generic_2.1.13-1osso0_amd64.deb
+    kmod-zfs-devel_2.1.13-1osso0_amd64.deb
+    libnvpair3_2.1.13-1osso0_amd64.deb
+    libuutil3_2.1.13-1osso0_amd64.deb
+    libzfs5-devel_2.1.13-1osso0_amd64.deb
+    libzfs5_2.1.13-1osso0_amd64.deb
+    libzpool5_2.1.13-1osso0_amd64.deb
+    python3-pyzfs_2.1.13-1osso0_amd64.deb
     zfs-2.1.13.tar.gz
-    zfs-dracut_2.1.13-1_amd64.deb
-    zfs-initramfs_2.1.13-1_amd64.deb
-    zfs-kmod-2.1.13-1.src.rpm
-    zfs-test_2.1.13-1_amd64.deb
-    zfs_2.1.13-1_amd64.deb
+    zfs-dracut_2.1.13-1osso0_amd64.deb
+    zfs-initramfs_2.1.13-1osso0_amd64.deb
+    zfs-test_2.1.13-1osso0_amd64.deb
+    zfs_2.1.13-1osso0_amd64.deb
 
-Or build many at once::
+Or build for many kernels using ``./buildmany.sh``:
 
-    ./buildmany.sh
-
-Builds packages in ``./builds``::
+.. code-block:: console
 
     $ find build -type d | LC_ALL=C sort
+
     build
     build/zfs-2.1.13
     build/zfs-2.1.13/zfs-2.1.13-5.15.0-72-generic-jammy

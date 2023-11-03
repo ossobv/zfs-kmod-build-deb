@@ -3,6 +3,7 @@ set -eu
 cd "$(dirname "$0")"
 
 OPENZFS_VERSION=zfs-2.1.13
+RELEASE_SUFFIX=osso1
 
 build_if_not_exists() {
     local codename="$1"; shift
@@ -21,7 +22,7 @@ _build_one_if_not_exists() {
 build/$OPENZFS_VERSION/$OPENZFS_VERSION-$uname_r-$codename"
     if ! test -d "$dir"; then
         if ! OPENZFS_VERSION=$OPENZFS_VERSION ./buildone.sh \
-                "$codename" "$uname_r" "$dir"; then
+                "$codename" "$uname_r" "$RELEASE_SUFFIX" "$dir"; then
             echo "ERROR: at $dir -- kernel not found? mkdir to skip" >&2
             exit 1
         fi

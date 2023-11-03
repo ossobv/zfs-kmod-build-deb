@@ -51,10 +51,21 @@ RUN apt-get -qy install $(cat /usr/src/build-targets/kernelpkg)
 USER 1000
 
 WORKDIR /usr/src/$OPENZFS_VERSION
+ARG RELEASE_SUFFIX=osso0
 RUN set -x && \
     NCPU=$(awk '\
         /^processor[[:blank:]]/{n=$3} \
         END{if(!n||n<1)print 1;else print n}' /proc/cpuinfo) && \
+    # Update RELEASE version, the quickest way we know how:
+    VER=$RELEASE_SUFFIX && \
+    sed -i -e '\
+        s/^\(RELEASE[[:blank:]]*=[[:blank:]]*[^[[:blank:]]*\).*/\1'$VER'/; \
+        \
+        /^srpm-common:/,/^$/{s@$(def)@$(def) --define "dist '$VER'"@}; \
+        /^rpm-common:/,/^$/{s@$(def)@$(def) --define "dist '$VER'"@}; \
+        \
+        s/--bump=0/--keep-version/; \
+    ' Makefile.in && \
     # Better fix would be -ffile-prefix-map=$rpmbuild=. but not sure in
     # which CFLAGS/etc. we could add it. Especially since rpmbuild does
     # the Make invocation from that path.
