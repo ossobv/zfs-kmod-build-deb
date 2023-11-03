@@ -51,6 +51,9 @@ Or build for many kernels using ``./buildmany.sh``:
 Installing
 ----------
 
+When installing on *Ubuntu*, we need the modules from ``kmod-zfs`` to
+take precedence. They are in ``/lib/modules/.../extra``.
+
 .. code-block:: diff
 
     --- /etc/depmod.d/ubuntu.conf
@@ -59,9 +62,11 @@ Installing
     -search updates ubuntu built-in
     +search extra updates ubuntu built-in
 
+Install the modules. Make sure they match the kernel version (``uname -r``):
+
 .. code-block:: console
 
-    # dpkg -i dpkg -i kmod-zfs-5.15.0-88-generic_2.1.13-1osso0_amd64.deb
+    # dpkg -i kmod-zfs-5.15.0-88-generic_2.1.13-1osso0_amd64.deb
 
     # depmod -a
 
@@ -72,6 +77,12 @@ Installing
 
     # cat /sys/module/zfs/version
     2.1.13-1osso0
+
+So far untested: *ZFS on root.* You probably want to install the
+appropriate ``zfs-initramfs`` package then as well, and likely others.
+We may run into conflicts when installing e.g. ``libzpool5`` because
+``libzpool5linux`` already has a
+``/lib/x86_64-linux-gnu/libzpool.so.5.0.0``.
 
 
 -------------------
@@ -93,9 +104,8 @@ Seeing the results:
 .. code-block:: console
 
     $ find build/zfs-2.1.13/zfs-2.1.13-5.15.0-*-generic-jammy \
-        -type f -name '*.deb' | xargs md5sum | sed -e 's@  .*/@  @' | sort | \
-        uniq -c | LC_ALL=C sort -k3 | awk '{print $3 "  (" $1 "x)"}' | \
-        LC_ALL=C sort
+        -type f -name '*.deb' | xargs md5sum | sed -e 's@  .*/@  @' |
+        sort | uniq -c | awk '{print $3 "  (" $1 "x)"}' | LC_ALL=C sort
 
     kmod-zfs-5.15.0-79-generic_2.1.13-1osso1_amd64.deb  (1x)
     kmod-zfs-5.15.0-84-generic_2.1.13-1osso1_amd64.deb  (1x)
