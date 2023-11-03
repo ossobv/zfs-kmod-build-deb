@@ -55,9 +55,20 @@ RUN set -x && \
     NCPU=$(awk '\
         /^processor[[:blank:]]/{n=$3} \
         END{if(!n||n<1)print 1;else print n}' /proc/cpuinfo) && \
+    # Better fix would be -ffile-prefix-map=$rpmbuild=. but not sure in
+    # which CFLAGS/etc. we could add it. Especially since rpmbuild does
+    # the Make invocation from that path.
+    sed -i -e '\
+        /^srpm-common:/,/^$/{s@=`mktemp[^`]*`@=/tmp/srpm;rm -rf /tmp/srpm;mkdir -p /tmp/srpm@}; \
+        /^rpm-common:/,/^$/{s@=`mktemp[^`]*`@=/tmp/rpm;rm -rf /tmp/rpm;mkdir -p /tmp/rpm@}; \
+        /^deb-utils:/,/^$/{s@=`mktemp[^`]*`@=/tmp/debu;rm -rf /tmp/debu;mkdir -p /tmp/debu@}; \
+    ' Makefile.in && \
+    # Alas, this workaround also requires single job mode
+    NCPU=1 && \
     ./configure --enable-systemd \
         --with-linux=/usr/src/linux-headers-$(cat ../build-targets/kernelver) \
     && \
     make -j$NCPU deb-utils deb-kmod
 
-RUN ../dpkg-repackage-reproducible *.deb
+ARG REPRODUCIBLE_HOST=zfs-kmod-build-deb
+RUN HOSTNAME=$REPRODUCIBLE_HOST ../dpkg-repackage-reproducible *.deb

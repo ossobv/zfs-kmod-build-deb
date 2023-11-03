@@ -36,17 +36,20 @@ freeze_deb() {
 }
 
 adjust_timestamps_in_directory() {
-    local debdir epoch dater datems
+    local debdir epoch dater datems bhost
     debdir=$1
     epoch=$2
     dater=$(TZ=UTC date -R -d "@$epoch")
     datems=$(TZ=UTC date '+%Y%m%d%H%M.00' -d "@$epoch")
+    bhost='zfs-kmod-build-deb'
+    test -n "$HOSTNAME" && bhost=$HOSTNAME
 
     # Fix (auto-generated) Debian changelog timestamp
     find "$debdir" -type f -name changelog.Debian.gz |
             while read -r changelog; do
         gunzip "$changelog"
-        sed -i -e 's/>  .*/>  '"$dater"'/' "${changelog%.gz}"
+        sed -i -e "s/^ -- root <[^>]*>  .*/ -- root <root@$bhost>  $dater/" \
+            "${changelog%.gz}"
         gzip -n "${changelog%.gz}"
     done
 
@@ -56,6 +59,7 @@ adjust_timestamps_in_directory() {
             sed -i -e '
                 s/^\(a binary .rpm package on\) .*/\1 '"$dater"'/
                 s/^\(Build Date[[:blank:]]*:[[:blank:]]*\).*/\1'"$dater"'/
+                s/^\(Build Host[[:blank:]]*:[[:blank:]]*\).*/\1'"$bhost"'/
             ' "$copyright"
         fi
     done
@@ -65,6 +69,10 @@ adjust_timestamps_in_directory() {
         gunzip "$zippedfile"
         gzip -n "${zippedfile%.gz}"
     done
+
+    # Update Maintainer in DEBIAN/control
+    sed -i -e 's/\(Maintainer: \).*/Maintainer: root <root@'"$bhost"'>/' \
+        "$debdir/DEBIAN/control"
 
     # Update md5sum list
     (
