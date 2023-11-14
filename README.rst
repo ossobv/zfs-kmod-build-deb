@@ -78,11 +78,59 @@ Install the modules. Make sure they match the kernel version (``uname -r``):
     # cat /sys/module/zfs/version
     2.1.13-1osso0
 
-So far untested: *ZFS on root.* You probably want to install the
-appropriate ``zfs-initramfs`` package then as well, and likely others.
-We may run into conflicts when installing e.g. ``libzpool5`` because
-``libzpool5linux`` already has a
-``/lib/x86_64-linux-gnu/libzpool.so.5.0.0``.
+Install the userland tools. On *Ubuntu/Jammy* we first need to remove
+(purge) the old packages:
+
+.. code-block:: console
+
+    # apt-get remove --purge \
+        libnvpair3linux libuutil3linux libzfs4linux libzpool5linux \
+        zfs-zed zfsutils-linux
+
+    # dpkg -i \
+        libnvpair3_2.1.13-1osso1_amd64.deb \
+        libuutil3_2.1.13-1osso1_amd64.deb \
+        libzfs5_2.1.13-1osso1_amd64.deb \
+        libzpool5_2.1.13-1osso1_amd64.deb \
+        zfs_2.1.13-1osso1_amd64.deb
+
+This contains all the userland stuff you need, except for *ZFS-on-root
+initramfs* requirements.
+
+You might need to (re)enable some dependencies:
+
+.. code-block:: console
+
+    # systemctl list-unit-files | grep ^zfs
+    zfs-import-cache.service        disabled        enabled
+    zfs-import-scan.service         disabled        disabled
+    zfs-import.service              masked          enabled
+    zfs-load-key.service            masked          enabled
+    zfs-mount.service               disabled        enabled
+    zfs-scrub@.service              static          -
+    zfs-share.service               disabled        enabled
+    zfs-volume-wait.service         disabled        enabled
+    zfs-zed.service                 disabled        enabled
+    zfs-import.target               disabled        enabled
+    zfs-volumes.target              disabled        enabled
+    zfs.target                      disabled        enabled
+    zfs-scrub-monthly@.timer        disabled        enabled
+    zfs-scrub-weekly@.timer         disabled        enabled
+
+    # systemctl enable \
+        zfs-import-cache.service zfs-mount.service zfs-share.service \
+        zfs-volume-wait.service zfs-zed.service zfs-import.target \
+        zfs-volumes.target zfs.target
+
+The bi-weekly default *Ubuntu* scrub cronjob is gone. You can enable one
+of the above timers if you wish.
+
+If your ``zfs-import-cache.service`` fails because ``zpool.cache`` is
+empty, you can just generate it by doing a ``zpool import POOL``. Skip
+``zpool export POOL``, as it would clear the ``zpool.cache`` again.
+
+**NOTE**: So far untested: *ZFS-on-root.* You probably want to install the
+appropriate ``zfs-initramfs`` and ``zfs-dracut``.
 
 
 -------------------
