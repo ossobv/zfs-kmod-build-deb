@@ -9,7 +9,7 @@ OUTPUT_DIR=${4:-./build.single}
 
 OPENZFS_VERSION=${OPENZFS_VERSION:-zfs-2.1.13}
 
-TAG=$(echo "build-$OPENZFS_VERSION-$DISTRO-$KERNEL_VERSION" |
+TAG=$(echo "build-$OPENZFS_VERSION-$RELEASE_SUFFIX-$DISTRO-$KERNEL_VERSION" |
       sed -e 's/-$//')
 
 # Easiest fix would be to set this here using --hostname, but 'docker

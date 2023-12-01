@@ -19,7 +19,7 @@ _build_one_if_not_exists() {
     local codename="$1"
     local uname_r="$2"
     local dir="\
-build/$OPENZFS_VERSION/$OPENZFS_VERSION-$uname_r-$codename"
+build/$OPENZFS_VERSION/$OPENZFS_VERSION-$RELEASE_SUFFIX-$uname_r+$codename"
     if ! test -d "$dir"; then
         if ! OPENZFS_VERSION=$OPENZFS_VERSION ./buildone.sh \
                 "$codename" "$uname_r" "$RELEASE_SUFFIX" "$dir"; then

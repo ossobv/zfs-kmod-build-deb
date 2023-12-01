@@ -34,17 +34,17 @@ Or build for many kernels using ``./buildmany.sh``:
 
     build
     build/zfs-2.1.13
-    build/zfs-2.1.13/zfs-2.1.13-5.15.0-72-generic-jammy
-    build/zfs-2.1.13/zfs-2.1.13-5.15.0-73-generic-jammy
-    build/zfs-2.1.13/zfs-2.1.13-5.15.0-75-generic-jammy
-    build/zfs-2.1.13/zfs-2.1.13-5.15.0-78-generic-jammy
-    build/zfs-2.1.13/zfs-2.1.13-5.15.0-79-generic-jammy
-    build/zfs-2.1.13/zfs-2.1.13-5.15.0-82-generic-jammy
-    build/zfs-2.1.13/zfs-2.1.13-5.15.0-83-generic-jammy
-    build/zfs-2.1.13/zfs-2.1.13-5.15.0-84-generic-jammy
-    build/zfs-2.1.13/zfs-2.1.13-5.15.0-86-generic-jammy
-    build/zfs-2.1.13/zfs-2.1.13-5.15.0-87-generic-jammy
-    build/zfs-2.1.13/zfs-2.1.13-5.15.0-88-generic-jammy
+    build/zfs-2.1.13/zfs-2.1.13-osso1-5.15.0-72-generic+jammy
+    build/zfs-2.1.13/zfs-2.1.13-osso1-5.15.0-73-generic+jammy
+    build/zfs-2.1.13/zfs-2.1.13-osso1-5.15.0-75-generic+jammy
+    build/zfs-2.1.13/zfs-2.1.13-osso1-5.15.0-78-generic+jammy
+    build/zfs-2.1.13/zfs-2.1.13-osso1-5.15.0-79-generic+jammy
+    build/zfs-2.1.13/zfs-2.1.13-osso1-5.15.0-82-generic+jammy
+    build/zfs-2.1.13/zfs-2.1.13-osso1-5.15.0-83-generic+jammy
+    build/zfs-2.1.13/zfs-2.1.13-osso1-5.15.0-84-generic+jammy
+    build/zfs-2.1.13/zfs-2.1.13-osso1-5.15.0-86-generic+jammy
+    build/zfs-2.1.13/zfs-2.1.13-osso1-5.15.0-87-generic+jammy
+    build/zfs-2.1.13/zfs-2.1.13-osso1-5.15.0-88-generic+jammy
 
 
 ----------
@@ -145,13 +145,13 @@ Seeing the results:
 
     $ ls -1 build/zfs-2.1.13
 
-    zfs-2.1.13-5.15.0-79-generic-jammy
-    zfs-2.1.13-5.15.0-84-generic-jammy
-    zfs-2.1.13-5.15.0-88-generic-jammy
+    zfs-2.1.13-osso1-5.15.0-79-generic+jammy
+    zfs-2.1.13-osso1-5.15.0-84-generic+jammy
+    zfs-2.1.13-osso1-5.15.0-88-generic+jammy
 
 .. code-block:: console
 
-    $ find build/zfs-2.1.13/zfs-2.1.13-5.15.0-*-generic-jammy \
+    $ find build/zfs-2.1.13/zfs-2.1.13-*-generic+jammy \
         -type f -name '*.deb' | xargs md5sum | sed -e 's@  .*/@  @' |
         sort | uniq -c | awk '{print $3 "  (" $1 "x)"}' | LC_ALL=C sort
 
@@ -178,6 +178,5 @@ Seeing the results:
 TODO
 ----
 
-* Fix the "zfs-2.1.13-5.15.0-79-generic-jammy" path to also contain "1osso1".
 * Get (some of) the reproducible-package fixes merged upstream.
 * Maybe replace ALIEN calls with a proper dpkg-buildpackage setup.
