@@ -2,8 +2,8 @@
 set -eu
 cd "$(dirname "$0")"
 
-OPENZFS_VERSION=zfs-2.1.13
-RELEASE_SUFFIX=osso1
+OPENZFS_VERSION=zfs-2.1.14
+RELEASE_SUFFIX=osso0
 
 build_if_not_exists() {
     local codename="$1"; shift
@@ -30,6 +30,6 @@ build/$OPENZFS_VERSION/$OPENZFS_VERSION-$RELEASE_SUFFIX-$uname_r+$codename"
 }
 
 # apt-cache search linux-headers-5.15.0- | sed -ne 's/^linux-headers-[^-]*-\([0-9]*\)-generic .*/\1/p' | sort -rn | tr '\n' ' '; echo
-build_if_not_exists jammy '5.15.0-#-generic' 88 87 86 84 83 82 79 78 75 73 72 25
+build_if_not_exists jammy '5.15.0-#-generic' 89 88 87 86 84 83 82 79 78 75 73 72 25
 # apt-cache search linux-headers-5.4.0- | sed -ne 's/^linux-headers-[^-]*-\([0-9]*\)-generic .*/\1/p' | sort -rn | tr '\n' ' '; echo
 #build_if_not_exists focal '5.4.0-#-generic' 150 149 148 147 146 144 139 137 136 135 132 131 128 126 125 124 122 121 120 117 113 110 109 107 105 104 100 99 97 96 94 92 91 90 89 88 86 84 81 80 77 74 73 72 71 70 67 66 65 64 62 60 59 58 54 53 52 51 48 47 45 42 40 39 37 33 31 29 28 26
